@@ -1,12 +1,14 @@
 # Blog_App
-----------------------------
+[![Gitter](https://badges.gitter.im/Blog_App/community.svg)](https://gitter.im/Blog_App/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ###  Installation
+
 Blog App requires [Node.js](https://nodejs.org/) v4+ to run.
 
 You must have [npm](https://www.npmjs.com/) installed in your computer. Then follow these steps:
 
 
-Install the dependencies and devDependencies and start the server.
+Install the dependencies and devDependencies
 
 ```sh
 $ cd BlogApp
@@ -14,6 +16,8 @@ $ cd BlogApp
 ```sh
 $ npm install 
 ```
+start the server
+
 ```sh
 $ node app.js
 ```
