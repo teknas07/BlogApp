@@ -39,10 +39,9 @@ var blogSchema = new mongoose.Schema({
 	}
 });
 
-// Mongoose/User Schema
 var Blog = mongoose.model("Blog",blogSchema);
 
-
+// Moongoose/User Schema
 var userSchema =new mongoose.Schema({
 	name:String,
 	password:String
@@ -59,7 +58,6 @@ app.use(function(req,res,next){
 	res.locals.currentUser=req.user;
 	next();
 });
-
 
 // Restful Routes
 
