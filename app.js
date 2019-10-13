@@ -5,6 +5,11 @@ const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
 
+const passport=require("passport");
+const localStrategy=require("passport-local");
+const passportlocalmongoose=require("passport-local-mongoose");
+const expresssession =require("express-session");
+
 const expressSanitizer = require("express-sanitizer");
 
 const methodOverride = require("method-override");
@@ -12,7 +17,13 @@ const methodOverride = require("method-override");
 // App Config
 mongoose.connect("mongodb://localhost/BlogApp");
 app.use(bodyParser.urlencoded({useNewUrlParser:true}));
-
+app.use(expresssession({
+	secret:"BlogApp",
+	resave: false,
+	saveUninitialized:false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 app.set("view engine","ejs");
 app.use(expressSanitizer());
 app.use(methodOverride("_method"));
@@ -28,7 +39,26 @@ var blogSchema = new mongoose.Schema({
 	}
 });
 
+// Mongoose/User Schema
 var Blog = mongoose.model("Blog",blogSchema);
+
+
+var userSchema =new mongoose.Schema({
+	name:String,
+	password:String
+});
+
+userSchema.plugin(passportlocalmongoose);
+var user=mongoose.model("user",userSchema);
+
+app.use(passport.initialize());
+passport.use(new localStrategy(user.authenticate()));
+passport.serializeUser(user.serializeUser());
+passport.deserializeUser(user.deserializeUser());
+app.use(function(req,res,next){
+	res.locals.currentUser=req.user;
+	next();
+});
 
 
 // Restful Routes
@@ -121,3 +151,44 @@ app.delete("/blogs/:id",function(req,res){
 app.listen("3000",function(req,res){
 	console.log("Server has started");
 });
+
+//Sign Up Route
+app.get("/register",function(req,res){
+	res.render("register");
+  });
+  
+app.post("/register",function(req,res){
+	 user.register(new user({username:req.body.username}),req.body.password,function(err,user)
+	 {
+		if(err)
+		{   
+			res.render("register");
+		}
+		passport.authenticate("local")(req,res,function()
+		{ 
+		  res.redirect("/blogs");
+		})
+	 })
+});
+  
+//Login routes
+app.get("/login",function(req,res){
+	res.render("login");
+});
+  
+app.post("/login",(req, res) => passport.authenticate('local', { successRedirect: '/blogs', failureRedirect: '/login', })(req, res));
+
+//Logout routes
+app.get("/logout",function(req,res){
+	req.logout();
+	res.redirect("/");
+});
+  
+function isloggedin(req,res,next){
+	 if(req.isAuthenticated())
+	   next();
+	 else{
+	   res.redirect("/login");
+	 }
+}
+ 
