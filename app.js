@@ -1,21 +1,23 @@
 const express = require("express");
 const app = express();
-
 const mongoose = require("mongoose");
-
 const bodyParser = require("body-parser");
-
 const expressSanitizer = require("express-sanitizer");
-
 const methodOverride = require("method-override");
+const passportLocalMongoose = require('passport-local-mongoose');
+const passport = require("passport");
+const  LocalStrategy  = require("passport-local");
+const User = require("./models/user"); 
 
 // App Config
-mongoose.connect("mongodb://localhost/BlogApp");
-app.use(bodyParser.urlencoded({useNewUrlParser:true}));
+mongoose.connect("mongodb://localhost/BlogApp",{useNewUrlParser: true ,useUnifiedTopology: true});
+app.use(bodyParser.urlencoded({extended: true}));
+
 
 app.set("view engine","ejs");
 app.use(expressSanitizer());
 app.use(methodOverride("_method"));
+
 
 // Mongoose/Model Config
 var blogSchema = new mongoose.Schema({
@@ -30,7 +32,26 @@ var blogSchema = new mongoose.Schema({
 
 var Blog = mongoose.model("Blog",blogSchema);
 
+    
+//PASSPORT CONFIGURATION
+app.use(require("express-session")({
+    secret:"ABC@1234",
+    resave:false,
+    saveUninitialized:false
+}));
 
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+//This is used to get the current user for every page
+app.use(function(req,res,next){
+   res.locals.currentUser = req.user;
+   next();
+});
 // Restful Routes
 
 app.get("/",function(req,res){
@@ -116,8 +137,57 @@ app.delete("/blogs/:id",function(req,res){
 		else{
 			res.redirect("/blogs")
 		}
-	})
-})
+	});
+});
+
+//Auth Routes
+
+//show register form
+app.get('/register',function(req,res){
+	res.render('register');	
+});
+
+//handle register logic
+app.post('/register',function(req,res){
+	var newUser = new User({username:req.body.username});
+	
+	User.register(newUser,req.body.password,function(err,user){
+		if(err){
+			
+			return res.redirect('register');
+		}
+		passport.authenticate("local")(req,res,function(){
+			//If user has successfully registered than redirect it to /blogs
+			res.redirect("/blogs");	
+		});
+	});
+	
+});
+
+
+//login form
+app.get('/login',function(req,res){
+	res.render("login");	
+});
+
+//handling the login logic
+app.post('/login',passport.authenticate("local",{
+	successRedirect:"/blogs",
+	failureRedirect:"/login"
+}),function(req,res){
+	
+});
+
+//logout logic
+app.get("/logout",function(req, res) {
+    req.logout();
+    res.redirect("/blogs");
+});
+
+
+
+
 app.listen("3000",function(req,res){
 	console.log("Server has started");
 });
+
