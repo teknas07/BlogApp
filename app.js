@@ -20,6 +20,7 @@ app.use(expressSanitizer());
 app.use(methodOverride("_method"));
 app.use(flash());
 
+
 // Mongoose/Model Config
 var blogSchema = new mongoose.Schema({
 	title:String,
@@ -51,7 +52,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use(function(req,res,next){
    res.locals.currentUser = req.user;
    res.locals.message=req.flash("error");
-   res.locals.smessage=req.flash("success");
+   res.locals.smessage=req.flash("success
    next();
 });
 // Restful Routes
@@ -179,14 +180,14 @@ app.post('/login',passport.authenticate("local",{
 	failureRedirect:"/login",
 	failureFlash:true
 }),function(req,res){
-	req.flash("success","Successfully logged u in !!!")
+	req.flash("success","Successfully logged u in !!!
 });
 
 //logout logic
 app.get("/logout",function(req, res) {
 	req.logout();
 	req.flash("success","successfully logged u out");
-    res.redirect("/blogs");
+  res.redirect("/blogs");
 });
 
 
