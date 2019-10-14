@@ -160,7 +160,7 @@ app.post('/register',function(req,res){
 		}
 		passport.authenticate("local")(req,res,function(){
 			//If user has successfully registered than redirect it to /blogs
-			req.flash("success","welcome"+ user.username);
+			req.flash("success","welcome "+ user.username);
 			res.redirect("/blogs");	
 		});
 	});
