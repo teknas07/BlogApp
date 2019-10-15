@@ -178,9 +178,9 @@ app.get('/login',function(req,res){
 app.post('/login',passport.authenticate("local",{
 	successRedirect:"/blogs",
 	failureRedirect:"/login",
-	failureFlash:true
+	failureFlash:true,
+	successFlash:"Successfully logged u in !!!"
 }),function(req,res){
-	req.flash("success","Successfully logged u in !!!
 });
 
 //logout logic
