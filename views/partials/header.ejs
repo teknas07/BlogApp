@@ -22,3 +22,24 @@
 					<a href="/logout" class="item navbar-right">Logout</a>
 			<% } %>
 		</div>
+		<div class="ui container">
+            <% if(message && message.length>0){ %>
+            <div>
+					<br>
+					<br>
+					<br>
+					<br>
+                    <%= message %>
+            </div>
+            <% } %>
+            <% if(smessage && smessage.length>0){ %>
+            <div>
+					<br>
+					<br>
+					<br>
+					<br>
+                    <%= smessage %>
+            </div>
+            <% } %>
+    	</div>
+	

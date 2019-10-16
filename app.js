@@ -8,6 +8,7 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const passport = require("passport");
 const  LocalStrategy  = require("passport-local");
 const User = require("./models/user"); 
+const flash=require("connect-flash");
 
 // App Config
 mongoose.connect("mongodb://localhost/BlogApp",{useNewUrlParser: true ,useUnifiedTopology: true});
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine","ejs");
 app.use(expressSanitizer());
 app.use(methodOverride("_method"));
+app.use(flash());
 
 
 // Mongoose/Model Config
@@ -39,7 +41,6 @@ app.use(require("express-session")({
     resave:false,
     saveUninitialized:false
 }));
-
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -50,6 +51,8 @@ passport.deserializeUser(User.deserializeUser());
 //This is used to get the current user for every page
 app.use(function(req,res,next){
    res.locals.currentUser = req.user;
+   res.locals.message=req.flash("error");
+   res.locals.smessage=req.flash("success
    next();
 });
 // Restful Routes
@@ -153,11 +156,12 @@ app.post('/register',function(req,res){
 	
 	User.register(newUser,req.body.password,function(err,user){
 		if(err){
-			
-			return res.redirect('register');
+			req.flash("error",err.message);
+			res.redirect('/register');
 		}
 		passport.authenticate("local")(req,res,function(){
 			//If user has successfully registered than redirect it to /blogs
+			req.flash("success","welcome "+ user.username);
 			res.redirect("/blogs");	
 		});
 	});
@@ -173,15 +177,17 @@ app.get('/login',function(req,res){
 //handling the login logic
 app.post('/login',passport.authenticate("local",{
 	successRedirect:"/blogs",
-	failureRedirect:"/login"
+	failureRedirect:"/login",
+	failureFlash:true,
+	successFlash:"Successfully logged u in !!!"
 }),function(req,res){
-	
 });
 
 //logout logic
 app.get("/logout",function(req, res) {
-    req.logout();
-    res.redirect("/blogs");
+	req.logout();
+	req.flash("success","successfully logged u out");
+  res.redirect("/blogs");
 });
 
 
